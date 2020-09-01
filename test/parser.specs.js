@@ -171,6 +171,14 @@ describe('odata.parser grammar', function () {
         assert.equal(ast.$filter.right.right.right.value, "Aro");
     });
 
+    it('should parse $search', function () {
+
+        var ast = parser.parse('$search=Auth0.swift');
+
+        assert.equal(ast.$search, 'Auth0.swift');
+
+    });
+
     it('should parse substringof $filter', function () {
 
         var ast = parser.parse("$filter=substringof('nginx', Data)");

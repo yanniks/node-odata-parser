@@ -212,6 +212,10 @@ expandList                  =   i:identifierPath list:("," WSP? l:expandList {re
                                     list.unshift(i);
                                     return list;
                                 }
+                                
+//$search
+search						=	"$search=" v:.+ { return {'$search': v.join('') }; }
+                            /   "$search=" .* { return {"error": 'invalid $format parameter'}; }
 
 //$skip
 skip                        =   "$skip=" a:INT {return {'$skip': ~~a }; }
@@ -390,6 +394,7 @@ exp                         =
                                 expand /
                                 filter /
                                 orderby /
+                                search /
                                 skip /
                                 top /
                                 format /
