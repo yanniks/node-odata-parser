@@ -1,6 +1,6 @@
 {
-  "name": "odata-parser",
-  "version": "1.4.1",
+  "name": "@claas/odata-parser",
+  "version": "1.4.2",
   "description": "OData query string parser",
   "main": "lib/index.js",
   "scripts": {
