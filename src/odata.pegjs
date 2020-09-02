@@ -173,6 +173,7 @@ nanInfinity                 =   nan / negativeInfinity / positiveInfinity
  */
 
 unreserved                  = a:[a-zA-Z0-9-_]+ { return a.join(''); }
+searchstring                = a:[^&]+ { return decodeURIComponent(a.join('')); }
 validstring                 = a:([^']/escapedQuote)* { return a.join('').replace(/('')/g, "'"); }
 escapedQuote                = a:"''" { return a; }
 identifierPart              = a:[_a-zA-Z] b:unreserved? { return a + b; }
@@ -214,8 +215,8 @@ expandList                  =   i:identifierPath list:("," WSP? l:expandList {re
                                 }
                                 
 //$search
-search						=	"$search=" v:.+ { return {'$search': v.join('') }; }
-                            /   "$search=" .* { return {"error": 'invalid $format parameter'}; }
+search						=	"$search=" v:searchstring { return {'$search': v }; }
+                            /   "$search=" .* { return {"error": 'invalid $search parameter'}; }
 
 //$skip
 skip                        =   "$skip=" a:INT {return {'$skip': ~~a }; }
