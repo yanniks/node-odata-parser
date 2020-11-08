@@ -111,6 +111,13 @@ export interface IFilterValueProperty {
     name?: string;
 }
 
+export interface ICollectionFilter {
+    type: "collectionfilter";
+    operator: "any" | "all";
+    property: IFilterValueProperty;
+    value: IFilterComparison | ICollectionFilter | IFilterFunctionCall;
+}
+
 export interface IFilterValueLiteral {
     type: "literal";
     value?: string;
@@ -123,7 +130,7 @@ export interface IFilterComparison {
 }
 
 export interface IODataProperties {
-    $filter?: IFilterComparison | IFilterFunctionCall;
+    $filter?: IFilterComparison | ICollectionFilter | IFilterFunctionCall;
     $top?: number;
     $skip?: number;
     $select?: string[];
