@@ -1,16 +1,16 @@
 var assert = require('assert');
 var parser = require("../lib");
 
-describe('odata.parser grammar', function () {
+describe('odata.parser grammar', function() {
 
-    it('should parse $top and return the value', function () {
+    it('should parse $top and return the value', function() {
 
         var ast = parser.parse('$top=40');
 
         assert.equal(ast.$top, 40);
     });
 
-    it('should parse two params', function () {
+    it('should parse two params', function() {
 
         var ast = parser.parse('$top=4&$skip=5');
 
@@ -19,7 +19,7 @@ describe('odata.parser grammar', function () {
     });
 
 
-    it('should parse three params', function () {
+    it('should parse three params', function() {
 
         var ast = parser.parse('$top=4&$skip=5&$select=Rating');
 
@@ -28,21 +28,21 @@ describe('odata.parser grammar', function () {
         assert.equal(ast.$select[0], "Rating");
     });
 
-    it('should parse string params', function () {
+    it('should parse string params', function() {
 
         var ast = parser.parse('$select=Rating');
 
         assert.equal(ast.$select[0], 'Rating');
     });
 
-    it('should accept * in $select', function () {
+    it('should accept * in $select', function() {
 
         var ast = parser.parse('$select=*');
 
         assert.equal(ast.$select[0], '*');
     });
 
-    it('should accept * and , and / in $select', function () {
+    it('should accept * and , and / in $select', function() {
 
         var ast = parser.parse('$select=*,Category/Name');
 
@@ -50,7 +50,7 @@ describe('odata.parser grammar', function () {
         assert.equal(ast.$select[1], 'Category/Name');
     });
 
-    it('should accept more than two fields', function () {
+    it('should accept more than two fields', function() {
 
         var ast = parser.parse('$select=Rating, Name,LastName');
 
@@ -60,21 +60,21 @@ describe('odata.parser grammar', function () {
     });
 
     // This select parameter is not currently supported.
-    it('should accept * after . in $select', function () {
+    it('should accept * after . in $select', function() {
 
         var ast = parser.parse('$select=DemoService.*');
 
         assert.equal(ast.$select[0], 'DemoService.*');
     });
 
-    it('should accept single-char field in $select', function () {
+    it('should accept single-char field in $select', function() {
 
         var ast = parser.parse('$select=r');
 
         assert.equal(ast.$select[0], 'r');
     });
-    
-    it('should parse order by', function () {
+
+    it('should parse order by', function() {
 
         var ast = parser.parse('$orderby=ReleaseDate desc, Rating');
 
@@ -83,7 +83,7 @@ describe('odata.parser grammar', function () {
 
     });
 
-    it('should parse $filter', function () {
+    it('should parse $filter', function() {
 
         var ast = parser.parse("$filter=Name eq 'Jef'");
 
@@ -93,47 +93,58 @@ describe('odata.parser grammar', function () {
         assert.equal(ast.$filter.right.type, "literal");
         assert.equal(ast.$filter.right.value, "Jef");
     });
-    
-    it('should parse $filter containing quote', function () {
-	var ast = parser.parse("$filter=Name eq 'O''Neil'");
 
-	assert.equal(ast.$filter.type, "eq");
-	assert.equal(ast.$filter.left.type, "property");
-	assert.equal(ast.$filter.left.name, "Name");
-	assert.equal(ast.$filter.right.type, "literal");
-	assert.equal(ast.$filter.right.value, "O'Neil");
+    it('should parse $filter with `any` operator', function() {
+
+        var ast = parser.parse("$filter=any(Dependencies,it eq 'Auth0.swift')");
+        console.log(ast);
+
+        assert.equal(ast.$filter.type, "collectionfilter");
+        assert.equal(ast.$filter.operator, "any");
+        assert.equal(ast.$filter.property.name, "Dependencies");
+        assert.equal(ast.$filter.value.type, "eq");
     });
 
-    it('should parse $filter with subproperty', function () {
-	var ast = parser.parse("$filter=User/Name eq 'Jef'");
-	assert.equal(ast.$filter.type, "eq");
-	assert.equal(ast.$filter.left.type, "property");
-	assert.equal(ast.$filter.left.name, "User/Name");
-	assert.equal(ast.$filter.right.type, "literal");
-	assert.equal(ast.$filter.right.value, "Jef");
+    it('should parse $filter containing quote', function() {
+        var ast = parser.parse("$filter=Name eq 'O''Neil'");
+
+        assert.equal(ast.$filter.type, "eq");
+        assert.equal(ast.$filter.left.type, "property");
+        assert.equal(ast.$filter.left.name, "Name");
+        assert.equal(ast.$filter.right.type, "literal");
+        assert.equal(ast.$filter.right.value, "O'Neil");
     });
-    
-    it('should parse $filter containing quote', function () {
 
-      var ast = parser.parse("$filter=Name eq 'O''Neil'");
-
-      assert.equal(ast.$filter.type, "eq");
-      assert.equal(ast.$filter.left.type, "property");
-      assert.equal(ast.$filter.left.name, "Name");
-      assert.equal(ast.$filter.right.type, "literal");
-      assert.equal(ast.$filter.right.value, "O'Neil");
-  });
-
-    it('should parse $filter with subproperty', function () {
-	var ast = parser.parse("$filter=User/Name eq 'Jef'");
-	assert.equal(ast.$filter.type, "eq");
-	assert.equal(ast.$filter.left.type, "property");
-	assert.equal(ast.$filter.left.name, "User/Name");
-	assert.equal(ast.$filter.right.type, "literal");
-	assert.equal(ast.$filter.right.value, "Jef");
+    it('should parse $filter with subproperty', function() {
+        var ast = parser.parse("$filter=User/Name eq 'Jef'");
+        assert.equal(ast.$filter.type, "eq");
+        assert.equal(ast.$filter.left.type, "property");
+        assert.equal(ast.$filter.left.name, "User/Name");
+        assert.equal(ast.$filter.right.type, "literal");
+        assert.equal(ast.$filter.right.value, "Jef");
     });
-    
-    it('should parse multiple conditions in a $filter', function () {
+
+    it('should parse $filter containing quote', function() {
+
+        var ast = parser.parse("$filter=Name eq 'O''Neil'");
+
+        assert.equal(ast.$filter.type, "eq");
+        assert.equal(ast.$filter.left.type, "property");
+        assert.equal(ast.$filter.left.name, "Name");
+        assert.equal(ast.$filter.right.type, "literal");
+        assert.equal(ast.$filter.right.value, "O'Neil");
+    });
+
+    it('should parse $filter with subproperty', function() {
+        var ast = parser.parse("$filter=User/Name eq 'Jef'");
+        assert.equal(ast.$filter.type, "eq");
+        assert.equal(ast.$filter.left.type, "property");
+        assert.equal(ast.$filter.left.name, "User/Name");
+        assert.equal(ast.$filter.right.type, "literal");
+        assert.equal(ast.$filter.right.value, "Jef");
+    });
+
+    it('should parse multiple conditions in a $filter', function() {
 
         var ast = parser.parse("$filter=Name eq 'John' and LastName lt 'Doe'");
 
@@ -150,7 +161,7 @@ describe('odata.parser grammar', function () {
         assert.equal(ast.$filter.right.right.value, "Doe");
     });
 
-    it('should parse multiple complex conditions in a $filter', function () {
+    it('should parse multiple complex conditions in a $filter', function() {
 
         var ast = parser.parse("$filter=Name eq 'John' and (LastName lt 'Doe' or LastName gt 'Aro')");
 
@@ -171,7 +182,7 @@ describe('odata.parser grammar', function () {
         assert.equal(ast.$filter.right.right.right.value, "Aro");
     });
 
-    it('should parse $search', function () {
+    it('should parse $search', function() {
 
         var ast = parser.parse('$search=Auth0.swift');
 
@@ -179,7 +190,7 @@ describe('odata.parser grammar', function () {
 
     });
 
-    it('components coming after $search should be parsed successfully', function () {
+    it('components coming after $search should be parsed successfully', function() {
 
         var ast = parser.parse('$search=Auth0.swift&$top=10');
 
@@ -188,7 +199,7 @@ describe('odata.parser grammar', function () {
 
     });
 
-    it('should parse substringof $filter', function () {
+    it('should parse substringof $filter', function() {
 
         var ast = parser.parse("$filter=substringof('nginx', Data)");
 
@@ -203,7 +214,7 @@ describe('odata.parser grammar', function () {
 
     });
 
-    it('should parse substringof $filter with empty string', function () {
+    it('should parse substringof $filter with empty string', function() {
 
         var ast = parser.parse("$filter=substringof('', Data)");
 
@@ -212,33 +223,33 @@ describe('odata.parser grammar', function () {
 
     });
 
-    it('should parse substringof $filter with string containing quote', function () {
+    it('should parse substringof $filter with string containing quote', function() {
 
-      var ast = parser.parse("$filter=substringof('ng''inx', Data)");
-      assert.equal(ast.$filter.args[0].type, "literal");
-      assert.equal(ast.$filter.args[0].value, "ng'inx");
-
-    });
-    
-    it('should parse substringof $filter with string starting with quote', function () {
-
-      var ast = parser.parse("$filter=substringof('''nginx', Data)");
-      
-      assert.equal(ast.$filter.args[0].type, "literal");
-      assert.equal(ast.$filter.args[0].value, "'nginx");
-
-    });
-    
-    it('should parse substringof $filter with string ending with quote', function () {
-
-      var ast = parser.parse("$filter=substringof('nginx''', Data)");
-      
-      assert.equal(ast.$filter.args[0].type, "literal");
-      assert.equal(ast.$filter.args[0].value, "nginx'");
+        var ast = parser.parse("$filter=substringof('ng''inx', Data)");
+        assert.equal(ast.$filter.args[0].type, "literal");
+        assert.equal(ast.$filter.args[0].value, "ng'inx");
 
     });
 
-    it('should parse substringof eq true in $filter', function () {
+    it('should parse substringof $filter with string starting with quote', function() {
+
+        var ast = parser.parse("$filter=substringof('''nginx', Data)");
+
+        assert.equal(ast.$filter.args[0].type, "literal");
+        assert.equal(ast.$filter.args[0].value, "'nginx");
+
+    });
+
+    it('should parse substringof $filter with string ending with quote', function() {
+
+        var ast = parser.parse("$filter=substringof('nginx''', Data)");
+
+        assert.equal(ast.$filter.args[0].type, "literal");
+        assert.equal(ast.$filter.args[0].value, "nginx'");
+
+    });
+
+    it('should parse substringof eq true in $filter', function() {
 
         var ast = parser.parse("$filter=substringof('nginx', Data) eq true");
 
@@ -256,7 +267,7 @@ describe('odata.parser grammar', function () {
         assert.equal(ast.$filter.right.value, true);
     });
 
-    it('should parse startswith $filter', function () {
+    it('should parse startswith $filter', function() {
 
         var ast = parser.parse("$filter=startswith('nginx', Data)");
 
@@ -271,36 +282,36 @@ describe('odata.parser grammar', function () {
 
     });
 
-    ['tolower', 'toupper', 'trim'].forEach(function (func) {
-      it('should parse ' + func + ' $filter', function () {
-          var ast = parser.parse("$filter=" + func + "(value) eq 'test'");
+    ['tolower', 'toupper', 'trim'].forEach(function(func) {
+        it('should parse ' + func + ' $filter', function() {
+            var ast = parser.parse("$filter=" + func + "(value) eq 'test'");
 
-          assert.equal(ast.$filter.type, "eq");
+            assert.equal(ast.$filter.type, "eq");
 
-          assert.equal(ast.$filter.left.type, "functioncall");
-          assert.equal(ast.$filter.left.func, func);
-          assert.equal(ast.$filter.left.args[0].type, "property");
-          assert.equal(ast.$filter.left.args[0].name, "value");
+            assert.equal(ast.$filter.left.type, "functioncall");
+            assert.equal(ast.$filter.left.func, func);
+            assert.equal(ast.$filter.left.args[0].type, "property");
+            assert.equal(ast.$filter.left.args[0].name, "value");
 
-          assert.equal(ast.$filter.right.type, "literal");
-          assert.equal(ast.$filter.right.value, "test");
-      });
+            assert.equal(ast.$filter.right.type, "literal");
+            assert.equal(ast.$filter.right.value, "test");
+        });
     });
 
-    ['year', 'month', 'day', 'hour', 'minute', 'second'].forEach(function (func) {
-      it('should parse ' + func + ' $filter', function () {
-        var ast = parser.parse("$filter=" + func + "(value) gt 0");
+    ['year', 'month', 'day', 'hour', 'minute', 'second'].forEach(function(func) {
+        it('should parse ' + func + ' $filter', function() {
+            var ast = parser.parse("$filter=" + func + "(value) gt 0");
 
-          assert.equal(ast.$filter.type, "gt");
+            assert.equal(ast.$filter.type, "gt");
 
-          assert.equal(ast.$filter.left.type, "functioncall");
-          assert.equal(ast.$filter.left.func, func);
-          assert.equal(ast.$filter.left.args[0].type, "property");
-          assert.equal(ast.$filter.left.args[0].name, "value");
+            assert.equal(ast.$filter.left.type, "functioncall");
+            assert.equal(ast.$filter.left.func, func);
+            assert.equal(ast.$filter.left.args[0].type, "property");
+            assert.equal(ast.$filter.left.args[0].name, "value");
 
-          assert.equal(ast.$filter.right.type, "literal");
-          assert.equal(ast.$filter.right.value, "0");
-      });
+            assert.equal(ast.$filter.right.type, "literal");
+            assert.equal(ast.$filter.right.value, "0");
+        });
     });
 
     it('should parse year datetimeoffset $filter', function() {
@@ -317,42 +328,42 @@ describe('odata.parser grammar', function () {
         assert.ok(ast.$filter.right.args[0].value instanceof Date);
     });
 
-    ['indexof', 'concat', 'substring', 'replace'].forEach(function (func) {
-      it('should parse ' + func + ' $filter', function () {
-        var ast = parser.parse("$filter=" + func + "('haystack', needle) eq 'test'");
+    ['indexof', 'concat', 'substring', 'replace'].forEach(function(func) {
+        it('should parse ' + func + ' $filter', function() {
+            var ast = parser.parse("$filter=" + func + "('haystack', needle) eq 'test'");
 
-        assert.equal(ast.$filter.type, "eq");
+            assert.equal(ast.$filter.type, "eq");
 
-        assert.equal(ast.$filter.left.type, "functioncall");
-        assert.equal(ast.$filter.left.func, func);
-        assert.equal(ast.$filter.left.args[0].type, "literal");
-        assert.equal(ast.$filter.left.args[0].value, "haystack");
-        assert.equal(ast.$filter.left.args[1].type, "property");
-        assert.equal(ast.$filter.left.args[1].name, "needle");
+            assert.equal(ast.$filter.left.type, "functioncall");
+            assert.equal(ast.$filter.left.func, func);
+            assert.equal(ast.$filter.left.args[0].type, "literal");
+            assert.equal(ast.$filter.left.args[0].value, "haystack");
+            assert.equal(ast.$filter.left.args[1].type, "property");
+            assert.equal(ast.$filter.left.args[1].name, "needle");
 
-        assert.equal(ast.$filter.right.type, "literal");
-        assert.equal(ast.$filter.right.value, "test");
-      });
+            assert.equal(ast.$filter.right.type, "literal");
+            assert.equal(ast.$filter.right.value, "test");
+        });
     });
 
-    ['substring', 'replace'].forEach(function (func) {
-      it('should parse ' + func + ' $filter with 3 args', function() {
-        var ast = parser.parse("$filter=" + func + "('haystack', needle, foo) eq 'test'");
+    ['substring', 'replace'].forEach(function(func) {
+        it('should parse ' + func + ' $filter with 3 args', function() {
+            var ast = parser.parse("$filter=" + func + "('haystack', needle, foo) eq 'test'");
 
-        assert.equal(ast.$filter.type, "eq");
+            assert.equal(ast.$filter.type, "eq");
 
-        assert.equal(ast.$filter.left.type, "functioncall");
-        assert.equal(ast.$filter.left.func, func);
-        assert.equal(ast.$filter.left.args[0].type, "literal");
-        assert.equal(ast.$filter.left.args[0].value, "haystack");
-        assert.equal(ast.$filter.left.args[1].type, "property");
-        assert.equal(ast.$filter.left.args[1].name, "needle");
-        assert.equal(ast.$filter.left.args[2].type, "property");
-        assert.equal(ast.$filter.left.args[2].name, "foo");
+            assert.equal(ast.$filter.left.type, "functioncall");
+            assert.equal(ast.$filter.left.func, func);
+            assert.equal(ast.$filter.left.args[0].type, "literal");
+            assert.equal(ast.$filter.left.args[0].value, "haystack");
+            assert.equal(ast.$filter.left.args[1].type, "property");
+            assert.equal(ast.$filter.left.args[1].name, "needle");
+            assert.equal(ast.$filter.left.args[2].type, "property");
+            assert.equal(ast.$filter.left.args[2].name, "foo");
 
-        assert.equal(ast.$filter.right.type, "literal");
-        assert.equal(ast.$filter.right.value, "test");
-      });
+            assert.equal(ast.$filter.right.type, "literal");
+            assert.equal(ast.$filter.right.value, "test");
+        });
     });
 
     it('should return an error if invalid value', function() {
@@ -363,19 +374,19 @@ describe('odata.parser grammar', function () {
     });
 
 
-    it('should convert dates to javascript Date', function () {
+    it('should convert dates to javascript Date', function() {
         var ast = parser.parse("$top=2&$filter=Date gt datetime'2012-09-27T21:12:59'");
         assert.ok(ast.$filter.right.value instanceof Date);
     });
 
-    it('should parse boolean okay', function(){
+    it('should parse boolean okay', function() {
         var ast = parser.parse('$filter=status eq true');
         assert.equal(ast.$filter.right.value, true);
         var ast = parser.parse('$filter=status eq false');
         assert.equal(ast.$filter.right.value, false);
     });
 
-    it('should parse numbers okay', function(){
+    it('should parse numbers okay', function() {
         var ast = parser.parse('$filter=status eq 3');
         assert.equal(ast.$filter.right.value, 3);
         // Test multiple digits - problem of not joining digits to array
@@ -386,34 +397,34 @@ describe('odata.parser grammar', function () {
         assert.equal(ast.$filter.right.value, 12);
     });
 
-    it('should parse negative numbers okay', function(){
+    it('should parse negative numbers okay', function() {
         var ast = parser.parse('$filter=status eq -3');
         assert.equal(ast.$filter.right.value, -3);
         ast = parser.parse('$filter=status eq -34');
         assert.equal(ast.$filter.right.value, -34);
     });
 
-    it('should parse decimal numbers okay', function(){
+    it('should parse decimal numbers okay', function() {
         var ast = parser.parse('$filter=status eq 3.4');
         assert.equal(ast.$filter.right.value, '3.4');
         ast = parser.parse('$filter=status eq -3.4');
         assert.equal(ast.$filter.right.value, '-3.4');
     });
 
-    it('should parse double numbers okay', function(){
+    it('should parse double numbers okay', function() {
         var ast = parser.parse('$filter=status eq 3.4e1');
         assert.equal(ast.$filter.right.value, '3.4e1');
         ast = parser.parse('$filter=status eq -3.4e-1');
         assert.equal(ast.$filter.right.value, '-3.4e-1');
     });
 
-    it('should parse $expand and return an array of identifier paths', function () {
+    it('should parse $expand and return an array of identifier paths', function() {
         var ast = parser.parse('$expand=Category,Products/Suppliers');
         assert.equal(ast.$expand[0], 'Category');
         assert.equal(ast.$expand[1], 'Products/Suppliers');
     });
 
-    it('should allow only valid values for $inlinecount', function () {
+    it('should allow only valid values for $inlinecount', function() {
         var ast = parser.parse('$inlinecount=allpages');
         assert.equal(ast.$inlinecount, 'allpages');
 
@@ -427,7 +438,7 @@ describe('odata.parser grammar', function () {
         assert.equal(ast.error, 'invalid $inlinecount parameter');
     });
 
-    it('should parse $format okay', function () {
+    it('should parse $format okay', function() {
         var ast = parser.parse('$format=application/atom+xml');
         assert.equal(ast.$format, 'application/atom+xml');
 
@@ -435,7 +446,7 @@ describe('odata.parser grammar', function () {
         assert.equal(ast.error, 'invalid $format parameter');
     });
 
-    it('should accept identifiers prefixed by _', function () {
+    it('should accept identifiers prefixed by _', function() {
         var ast = parser.parse("$filter=_first_name eq 'John'");
         assert.equal(ast.$filter.left.name, "_first_name");
     });

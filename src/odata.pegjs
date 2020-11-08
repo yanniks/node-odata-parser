@@ -164,6 +164,8 @@ negativeInfinity            =   "-INF"
 
 positiveInfinity            =   "INF"
 
+filterArrayOperator         = "any" / "all"
+
 nanInfinity                 =   nan / negativeInfinity / positiveInfinity
 
 // end: OData literals
@@ -278,6 +280,15 @@ filter                      =   "$filter=" list:filterExpr {
                                 }
                             /   "$filter=" .* { return {"error": 'invalid $filter parameter'}; }
 
+filterv4                    =   op:filterArrayOperator "(" property:part "," nestedFilter:filterExpr ")" {
+                                return {
+                                    type: "collectionfilter",
+                                    operator: op,
+                                    property: property,
+                                    value: nestedFilter
+                                }
+                            }
+
 filterExpr                  = 
                               left:("(" WSP? filter:filterExpr WSP? ")"{return filter}) right:( WSP type:("and"/"or") WSP value:filterExpr{
                                     return { type: type, value: value}
@@ -288,7 +299,8 @@ filterExpr                  =
                                     return { type: type, value: value}
                               })? {
                                 return filterExprHelper(left, right);
-                              }
+                              } /
+                              filterv4
 
 booleanFunctions2Args       = "substringof" / "endswith" / "startswith" / "IsOf"
 
