@@ -97,12 +97,21 @@ describe('odata.parser grammar', function() {
     it('should parse $filter with `any` operator', function() {
 
         var ast = parser.parse("$filter=any(Dependencies,it eq 'Auth0.swift')");
-        console.log(ast);
 
         assert.equal(ast.$filter.type, "collectionfilter");
         assert.equal(ast.$filter.operator, "any");
         assert.equal(ast.$filter.property.name, "Dependencies");
         assert.equal(ast.$filter.value.type, "eq");
+    });
+
+    it('should parse $filter with `in` operator', function() {
+
+        var ast = parser.parse("$filter=Version in (1,2,4,'1.4')");
+        console.log(ast);
+
+        assert.equal(ast.$filter.type, "in");
+        assert.equal(ast.$filter.left.name, "Version");
+        assert.equal(ast.$filter.right.value.toString(), [1, 2, 4, "1.4"].toString());
     });
 
     it('should parse $filter containing quote', function() {

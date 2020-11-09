@@ -98,6 +98,7 @@ export enum IFilterOperation {
     multiplication = "mul",
     division = "div",
     modulo = "mod",
+    in = "in",
 }
 
 export interface IFilterFunctionCall {
@@ -123,10 +124,15 @@ export interface IFilterValueLiteral {
     value?: string;
 }
 
+export interface IFilterValueList {
+    type: "list";
+    value: any[];
+}
+
 export interface IFilterComparison {
     type: IFilterOperation;
-    left: IFilterValueProperty | IFilterValueLiteral | IFilterComparison | IFilterFunctionCall;
-    right: IFilterValueProperty | IFilterValueLiteral | IFilterComparison | IFilterFunctionCall;
+    left: IFilterValueProperty | IFilterValueLiteral | IFilterComparison | IFilterFunctionCall | IFilterValueList;
+    right: IFilterValueProperty | IFilterValueLiteral | IFilterComparison | IFilterFunctionCall | IFilterValueList;
 }
 
 export interface IODataProperties {

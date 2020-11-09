@@ -280,7 +280,7 @@ filter                      =   "$filter=" list:filterExpr {
                                 }
                             /   "$filter=" .* { return {"error": 'invalid $filter parameter'}; }
 
-filterv4                    =   op:filterArrayOperator "(" property:part "," nestedFilter:filterExpr ")" {
+filterv4                    =   op:filterArrayOperator "(" property:part "," WSP? nestedFilter:filterExpr ")" {
                                 return {
                                     type: "collectionfilter",
                                     operator: op,
@@ -288,6 +288,15 @@ filterv4                    =   op:filterArrayOperator "(" property:part "," nes
                                     value: nestedFilter
                                 }
                             }
+
+filterInList                =   i:primitiveLiteral list:("," WSP? l:filterInList {return l;})? {
+                                    if (list === "") list = [];
+                                    if (require('util').isArray(list[0])) {
+                                        list = list[0];
+                                    }
+                                    list.unshift(i);
+                                    return list;
+                                }
 
 filterExpr                  = 
                               left:("(" WSP? filter:filterExpr WSP? ")"{return filter}) right:( WSP type:("and"/"or") WSP value:filterExpr{
@@ -300,7 +309,10 @@ filterExpr                  =
                               })? {
                                 return filterExprHelper(left, right);
                               } /
-                              filterv4
+                              filterv4 /
+                              left:identifierPath WSP "in" WSP "(" items:filterInList ")" {
+                                  return {type: "in", left: {type: "property", name: left}, right: {type: "list", value: items}}
+                              }
 
 booleanFunctions2Args       = "substringof" / "endswith" / "startswith" / "IsOf"
 
